@@ -5,12 +5,13 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session')
 var fileStore = require('session-file-store')(session)
+var passport = require('passport')
+var authenticate = require('./authenticate')
 
 const mongoose = require('mongoose')
 
 const url = "mongodb://localhost:27017/conFusion"
 const connect = mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
-const { db } = require('./models/dishes');
 
 connect.then((db) => {
   console.log("Connect correctly  to the server")
@@ -32,8 +33,6 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser('12345-67890'));
-app.use('/', indexRouter);
-app.use('/users', userRouter);
 
 app.use(session({
   name: 'session-id',
@@ -43,24 +42,21 @@ app.use(session({
   store: new fileStore()
 }))
 
+app.use(passport.initialize())
+app.use(passport.session())
+app.use('/', indexRouter);
+app.use('/users', userRouter);
 
 const auth = (req, res, next) => {
-  console.log(req.session)
-  if(!req.session.user) {
+  console.log("req user is.......",req.user)
+  if(!req.user) {
     var err = new Error('You are not authenticated!')
     err.status = 403;
     return next(err)
   }
 
   else {
-    if(req.session.user === 'authenticated') {
-      next()
-    }
-    else{
-      var err = new Error('You are not authenticated!')
-      err.status = 403;
-      return next(err)
-    }
+    next()
   }
   
 }
