@@ -8,8 +8,9 @@ var fileStore = require('session-file-store')(session)
 
 const mongoose = require('mongoose')
 
-const url = "mongodb://localhost/27017/conFusion"
-const connect = mongoose.connect(url, {useMongoClient: true})
+const url = "mongodb://localhost:27017/conFusion"
+const connect = mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
+const { db } = require('./models/dishes');
 
 connect.then((db) => {
   console.log("Connect correctly  to the server")
@@ -25,7 +26,7 @@ var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(express.json());
